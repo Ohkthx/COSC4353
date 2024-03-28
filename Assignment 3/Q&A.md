@@ -32,3 +32,4 @@ https://github.com/Angel-Sharma/COSC4353/tree/913d268168517f3f1e6022729f53540701
 We are using Node js, express, and some type of no sql db
 
 3. IMPORTANT: list who did what within the group. TAs should be able to validate in GitHub, otherwise team members who didn't contribute will receive a ZERO.
+Contributed Pricing Module - Benjamin Mogeni
