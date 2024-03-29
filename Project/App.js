@@ -130,12 +130,11 @@ app.post("/register", (req, res) => {
     return /^[A-Z]/.test(str);
   }
 
+  const beginsWithCapitalLetter = startsWithCapitalLetter(password);
+
   // Check if the user already exists in the database
   const user = db.get_account(username);
   const requiredLength = username.length <= 8 || password.length <= 8;
-  const beginsWithCapitalLetter = accounts.find((u) =>
-    startsWithCapitalLetter(u.password)
-  );
 
   if (user) {
     return res.status(400).json({ error: "Username already exists" });
@@ -145,7 +144,8 @@ app.post("/register", (req, res) => {
       .json({ error: "This username or password is too short" });
   } else {
     db.insert_account(new Account(username, password));
-    res.redirect("/login");
+    req.session.user = { username };
+    res.redirect("/user/update");
   }
 });
 
