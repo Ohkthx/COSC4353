@@ -78,7 +78,7 @@ class Database {
       return;
     }
 
-    ACCOUNTS[username] = account;
+    ACCOUNTS[account.username] = account;
   }
 
   // This will insert into the database (backend) once hooked up to set the user profile data.
@@ -113,7 +113,7 @@ class Database {
       return;
     }
 
-    ACCOUNTS[username] = account;
+    ACCOUNTS[account.username] = account;
   }
 
   // This will update into the database (backend) once hooked up to set the user profile data.
