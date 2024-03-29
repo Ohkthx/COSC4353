@@ -36,8 +36,8 @@ We are using Node js, express, some type of no sql db, and jest for code coverag
 
 To run code coverage using jest:
 
-  1. Install Jest. Open terminal and type: npm install --save-dev jest
-  2. Once installed, type in terminal: npx jest --coverage
+    1. Install Jest. Open terminal and type: npm install --save-dev jest
+    2. Once installed, type in terminal: npx jest --coverage
 
 3. IMPORTANT: list who did what within the group. TAs should be able to validate in GitHub, otherwise team members who didn't contribute will receive a ZERO.
 
