@@ -32,7 +32,10 @@ https://github.com/Angel-Sharma/COSC4353/tree/913d268168517f3f1e6022729f53540701
 We are using Node js, express, and some type of no sql db
 
 3. IMPORTANT: list who did what within the group. TAs should be able to validate in GitHub, otherwise team members who didn't contribute will receive a ZERO.
-   
+
+Contributed Login Module and registration module - Suryansh Sharma
+
+
 Contributed Pricing Module - Benjamin Mogeni
 
 Contributed code coverage reports for all the important backend modules that were implemented. This includes the user.js (client profile management), quote.js (fuel quote module), and loginVal.js (login module). - Abhinav Krothapalli
