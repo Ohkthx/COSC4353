@@ -32,7 +32,7 @@ https://github.com/Angel-Sharma/COSC4353/tree/913d268168517f3f1e6022729f53540701
 
 2. List what backend technologies you are using and why? (2 points)
 
-We are using Node js, express, some type of no sql db, and jest for code coverage
+We are using Node js, express ,and jest for code coverage
 
 To run code coverage using jest:
 
