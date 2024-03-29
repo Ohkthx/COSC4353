@@ -28,4 +28,9 @@ function handleFormSubmission(event) {
   });
 }
 
-document.getElementById('login-form').addEventListener('submit', handleFormSubmission);
+const el = document.getElementById('login-form');
+if (el){
+  el.addEventListener('submit', handleFormSubmission)
+}
+//document.getElementById('login-form').addEventListener('submit', handleFormSubmission);
+module.exports = { handleFormSubmission };
