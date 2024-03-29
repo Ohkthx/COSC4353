@@ -32,7 +32,12 @@ https://github.com/Angel-Sharma/COSC4353/tree/913d268168517f3f1e6022729f53540701
 
 2. List what backend technologies you are using and why? (2 points)
 
-We are using Node js, express, and some type of no sql db
+We are using Node js, express, some type of no sql db, and jest for code coverage
+
+To run code coverage using jest:
+
+  1. Install Jest. Open terminal and type: npm install --save-dev jest
+  2. Once installed, type in terminal: npx jest --coverage
 
 3. IMPORTANT: list who did what within the group. TAs should be able to validate in GitHub, otherwise team members who didn't contribute will receive a ZERO.
 
