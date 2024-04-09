@@ -1,9 +1,9 @@
 const User = require("../models/user");
 
 // Processes GET requests to the `/api/user/profile` route.
-function api_get_user(db, req, res) {
+async function api_get_user(db, req, res) {
   const username = req.session.user.username;
-  const user = db.get_user(username);
+  const user = await db.get_user(username);
 
   if (!req.session.user || !username || !user) {
     res.status(401).json({ error: "Not authenticated" });
@@ -48,10 +48,14 @@ function post_update(db, req, res) {
   }
 
   // Updates the user profile information.
-  db.update_user(
-    username,
-    new User(fullname, address1, address2, city, zipcode, state)
-  );
+  db.update_user(username, {
+    fullname,
+    address1,
+    address2,
+    city,
+    zipcode,
+    state,
+  });
 
   // Redirect to the user profile.
   res.redirect("/user");

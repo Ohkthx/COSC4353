@@ -1,30 +1,8 @@
 const User = require("./models/user");
 const Quote = require("./models/quote");
 const Account = require("./models/account");
-
-// Temporary values, these will exist within database later.
-// Account information for authentication.
-let ACCOUNTS = {
-  user1: new Account("user1", "password1"),
-  user2: new Account("user2", "password2"),
-};
-
-// Temporary values, these will exist within database later.
-// Users / profile data for individual users.
-let USERS = {
-  user1: new User("John Doe", "1234 Some St.", "", "Houston", 77002, "TX"),
-  user2: new User("John Doe2", "1234 Some St.", "", "Houston", 77002, "TX"),
-};
-
-// Temporary values, these will exist within database later.
-// Quote data.
-const user1_addr = "1234 Some St., Houston, TX 77002";
-let QUOTES = {
-  user1: {
-    1: new Quote(1, 5.0, user1_addr, "2024-03-25", 3.01),
-    2: new Quote(2, 3.0, user1_addr, "2024-03-26", 3.21),
-  },
-};
+const mongoose = require("mongoose");
+require("dotenv").config();
 
 const PRICE = {
   price: "3.50",
@@ -32,108 +10,69 @@ const PRICE = {
 
 class Database {
   /// Used to create the database, normally a url is a destination to connect to.
-  constructor(url = "localhost") {
-    this.url = url;
+  constructor(url = "mongodb://localhost/cosc4353") {
+    this.url = process.env.MONGO_URL || url;
+
+    mongoose
+      .connect(this.url, {})
+      .then(() => console.log("MongoDB connected."))
+      .catch((err) => {
+        console.error("MongoDB connection error:", err);
+        throw new Error();
+      });
   }
 
   // SELECT / Getters
-  // This will query the database (backend) once hooked up to get the account data.
-  get_account(username) {
-    return ACCOUNTS[username];
+  async get_account(username) {
+    return Account.findOne({ username }).exec();
   }
 
-  // This will query the database (backend) once hooked up to get the user profile data.
-  get_user(username) {
-    return USERS[username];
+  async get_user(username) {
+    return User.findOne({ username }).exec();
   }
 
-  // This will query the database (backend) once hooked up to get the quote data.
-  get_quote(username, quote_id) {
-    if (!(username in QUOTES)) {
-      QUOTES[username] = {};
-    }
-
-    return QUOTES[username][quote_id];
+  async get_quote(username, quote_id) {
+    return Quote.findOne({ username, quote_id }).exec();
   }
 
-  // This will query the database (backend) once hooked up to get the historical quote data.
-  get_history(username) {
-    if (!(username in QUOTES)) {
-      QUOTES[username] = {};
-    }
-
-    return QUOTES[username];
+  async get_history(username) {
+    return Quote.find({ username }).exec();
   }
 
-  // This will query the database (backend) once hooked up to get the price data.
-  get_price() {
+  async get_price() {
     return PRICE;
   }
 
   // INSERT / Create
-  // This will insert into the database (backend) once hooked up to set the account data.
-  insert_account(account) {
-    if (account.username in ACCOUNTS) {
-      // NOTE: Throw an error? It already exists.
-      return;
-    }
-
-    ACCOUNTS[account.username] = account;
+  async insert_account(account) {
+    return account.save();
   }
 
-  // This will insert into the database (backend) once hooked up to set the user profile data.
-  insert_user(username, user) {
-    if (username in USERS) {
-      // NOTE: Throw an error? It already exists.
-      return;
-    }
-
-    USERS[username] = user;
+  async insert_user(user) {
+    return user.save();
   }
 
-  // This will insert into the database (backend) once hooked up to set the quote data.
-  insert_quote(username, quote) {
-    if (!(username in QUOTES)) {
-      QUOTES[username] = {};
-    }
-
-    if (quote.quote_id in QUOTES) {
-      // NOTE: Throw an error? It already exists.
-      return;
-    }
-
-    QUOTES[username][quote.quote_id] = quote;
+  async insert_quote(quote) {
+    return quote.save();
   }
 
   // UPDATE
-  // This will update into the database (backend) once hooked up to set the account data.
-  update_account(account) {
-    if (!(account.username in ACCOUNTS)) {
-      // NOTE: Throw an error? It does not exist.
-      return;
-    }
-
-    ACCOUNTS[account.username] = account;
+  async update_account(username, account) {
+    return Account.findOneAndUpdate({ username }, account, {
+      new: true,
+    }).exec();
   }
 
-  // This will update into the database (backend) once hooked up to set the user profile data.
-  update_user(username, user) {
-    if (!(username in USERS)) {
-      // NOTE: Throw an error? It does not exist.
-      return;
-    }
-
-    USERS[username] = user;
+  async update_user(username, user) {
+    return User.findOneAndUpdate({ username }, user, {
+      new: true,
+    }).exec();
   }
 
-  // This will update into the database (backend) once hooked up to set the quote data.
-  update_quote(quote_id, quote) {
-    if (!(quote_id in QUOTES)) {
-      // NOTE: Throw an error? It does not exist.
-      return;
-    }
-
-    QUOTES[quote_id] = quote;
+  async update_quote(username, quote_id, quote) {
+    return Quote.findOneAndUpdate({ username, quote_id }, quote, {
+      new: true,
+    }).exec();
   }
 }
 

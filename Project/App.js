@@ -6,6 +6,7 @@ const path = require("path");
 const PATHS = require("./defaults");
 const Database = require("./database");
 const Account = require("./models/account");
+const User = require("./models/user");
 const { checkAuth } = require("./utils");
 const {
   post_update,
@@ -93,10 +94,11 @@ app.get("/api/quote/price", (req, res) => {
   api_get_price(db, req, res);
 });
 
-app.post("/login", (req, res) => {
+app.post("/login", async (req, res) => {
   let username = req.body.username;
   let password = req.body.password;
-  //Check if username and password are entered
+
+  // nologin is used for testing to override the process.
   if (!nologin && (!username || !password)) {
     return res
       .status(400)
@@ -106,46 +108,48 @@ app.post("/login", (req, res) => {
     password = "password1";
   }
 
-  // check if username and password are correct
-  const account = db.get_account(username);
-  if (!account || account.password != password) {
-    return res.status(401).json({ error: "Invalid username or password" });
-  } else {
-    req.session.user = { username };
-    res.redirect("/user");
+  try {
+    // Check if the user account exists already.
+    const account = await db.get_account(username);
+    if (!account || account.password !== password) {
+      return res.status(401).json({ error: "Invalid username or password" });
+    } else {
+      req.session.user = { username };
+      res.redirect("/user");
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
-app.post("/register", (req, res) => {
+app.post("/register", async (req, res) => {
   let username = req.body.username;
   let password = req.body.password;
-  // Check if username and password are provided
+
+  // Requires username and password fields.
   if (!username || !password) {
     return res
       .status(400)
       .json({ error: "Username and password are required" });
   }
 
-  function startsWithCapitalLetter(str) {
-    return /^[A-Z]/.test(str);
-  }
+  try {
+    // Check if the user exists already.
+    const user = await db.get_account(username);
+    if (user) {
+      return res.status(400).json({ error: "Username already exists" });
+    } else {
+      await db.insert_account(Account.createAccount(username, password));
 
-  const beginsWithCapitalLetter = startsWithCapitalLetter(password);
-
-  // Check if the user already exists in the database
-  const user = db.get_account(username);
-  const requiredLength = username.length <= 8 || password.length <= 8;
-
-  if (user) {
-    return res.status(400).json({ error: "Username already exists" });
-  } else if (requiredLength) {
-    return res
-      .status(400)
-      .json({ error: "This username or password is too short" });
-  } else {
-    db.insert_account(new Account(username, password));
-    req.session.user = { username };
-    res.redirect("/user/update");
+      // Create placeholder profile data.
+      await db.insert_user(User.createUser(username));
+      req.session.user = { username };
+      res.redirect("/user/update");
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
