@@ -82,16 +82,16 @@ app.get("/quote/history", checkAuth, (req, res) => {
   get_history(req, res, PATHS.get("QUOTE_HISTORY"));
 });
 
-app.get("/api/user/profile", (req, res) => {
-  api_get_user(db, req, res);
+app.get("/api/user/profile", async (req, res) => {
+  await api_get_user(db, req, res);
 });
 
-app.get("/api/quote/history", (req, res) => {
-  api_get_history(db, req, res);
+app.get("/api/quote/history", async (req, res) => {
+  await api_get_history(db, req, res);
 });
 
-app.get("/api/quote/price", (req, res) => {
-  api_get_price(db, req, res);
+app.get("/api/quote/price", async (req, res) => {
+  await api_get_price(db, req, res);
 });
 
 app.post("/login", async (req, res) => {
@@ -118,7 +118,7 @@ app.post("/login", async (req, res) => {
       res.redirect("/user");
     }
   } catch (error) {
-    console.error(error);
+    console.error(`[LOGIN]: ${error}`);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -136,8 +136,8 @@ app.post("/register", async (req, res) => {
 
   try {
     // Check if the user exists already.
-    const user = await db.get_account(username);
-    if (user) {
+    const account = await db.get_account(username);
+    if (account) {
       return res.status(400).json({ error: "Username already exists" });
     } else {
       await db.insert_account(Account.createAccount(username, password));
@@ -148,17 +148,17 @@ app.post("/register", async (req, res) => {
       res.redirect("/user/update");
     }
   } catch (error) {
-    console.error(error);
+    console.error(`[REGISTER]: ${error}`);
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
-app.post("/user/update", (req, res) => {
-  post_update(db, req, res);
+app.post("/user/update", async (req, res) => {
+  await post_update(db, req, res);
 });
 
-app.post("/quote", (req, res) => {
-  post_quote(db, req, res);
+app.post("/quote", async (req, res) => {
+  await post_quote(db, req, res);
 });
 
 app.listen(PORT, () => {
