@@ -1,9 +1,3 @@
-const { JSDOM } = require('jsdom');
-
-const dom = new JSDOM('<!doctype html><html><body></body></html>');
-global.document = dom.window.document;
-global.window = dom.window;
-
 const { handleFormSubmission } = require('./loginVal');
 
 global.fetch = jest.fn(() =>
@@ -22,7 +16,6 @@ describe('handleFormSubmission function', () => {
   });
 
   test('should send POST request with correct data and redirect on successful login', async () => {
-    // Mock form data
     document.body.innerHTML = `
       <form id="login-form">
         <input id="username" value="testUser" />
@@ -73,7 +66,6 @@ describe('handleFormSubmission function', () => {
   test('should handle fetch error', async () => {
     fetch.mockRejectedValueOnce('Fetch error');
 
-    // Mock form data
     document.body.innerHTML = `
       <form id="login-form">
         <input id="username" value="testUser" />
@@ -96,3 +88,4 @@ describe('handleFormSubmission function', () => {
 
   
 });
+
