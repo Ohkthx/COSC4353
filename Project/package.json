@@ -8,7 +8,23 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "jest": {
-    "collectCoverage": true
+    "collectCoverage": true,
+    "projects": [
+      {
+        "testEnvironment": "node",
+        "testMatch": [
+          "**/__tests__/**/*.js",
+          "**/?(*.)+(spec|test).js"
+        ]
+      },
+      {
+        "displayName": "loginVal",
+        "testEnvironment": "jsdom",
+        "testMatch": [
+          "**/loginVal.test.js"
+        ]
+      }
+    ]
   },
   "keywords": [],
   "author": "",
