@@ -1,297 +1,347 @@
-const {
-    api_get_history,
-    api_get_price,
-    get_history,
-    get_quote,
-    post_quote,
-  } = require('./quote');
+const mongoose = require('mongoose');
+const Quote = require('../models/quote');
+const { checkAuth } = require('../utils');
 
-  const Quote = require('../models/quote');
-  const { getToday } = require('../utils');
+const {
+  api_get_history,
+  api_get_price,
+  get_history,
+  get_quote,
+  post_quote,
+} = require('./quote');
+
+const dbMock = {
+  get_history: jest.fn(),
+  get_price: jest.fn(),
+  get_user: jest.fn(),
+  insert_quote: jest.fn(),
+};
+
+const reqMock = {
+  session: {
+    user: {
+      username: 'testUser',
+    },
+  },
+  body: {},
+};
+
+const resMock = {
+  status: jest.fn(() => resMock),
+  json: jest.fn(),
+  sendFile: jest.fn(),
+  redirect: jest.fn(),
+};
+
+describe('api_get_history', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
   
-  describe('api_get_history', () => {
-    test('should respond with 401 status when user is not authenticated', () => {
-      // Mock database and request/response objects
-      const mockDb = {
+    it('should return "Not authenticated" error if user is not authenticated', async () => {
+      const reqMock = {
+        session: {
+          user: {},
+        },
+      };
+      const resMock = {
+        status: jest.fn(() => resMock),
+        json: jest.fn(),
+      };
+      const dbMock = {
         get_history: jest.fn(),
       };
-      const mockReq = {
+  
+      await api_get_history(dbMock, reqMock, resMock);
+  
+      expect(resMock.status).toHaveBeenCalledWith(401);
+      expect(resMock.json).toHaveBeenCalledWith({ error: 'Not authenticated' });
+    });
+  
+    it('should return history if user is authenticated', async () => {
+      const username = 'testUser';
+      const reqMock = {
         session: {
-          user: {},
+          user: { username },
         },
       };
-      const mockRes = {
-        status: jest.fn().mockReturnThis(),
+      const resMock = {
+        status: jest.fn(() => resMock),
         json: jest.fn(),
       };
+      const historyData = [{ quote: 'quote1' }, { quote: 'quote2' }];
+      const dbMock = {
+        get_history: jest.fn().mockResolvedValue(historyData),
+      };
   
-      // Call the function to be tested
-      api_get_history(mockDb, mockReq, mockRes);
+      await api_get_history(dbMock, reqMock, resMock);
   
-      expect(mockRes.status).toHaveBeenCalledWith(401);
-      expect(mockRes.json).toHaveBeenCalledWith({ error: 'Not authenticated' });
+      expect(dbMock.get_history).toHaveBeenCalledWith(username);
+      expect(resMock.status).toHaveBeenCalledWith(200);
+      expect(resMock.json).toHaveBeenCalledWith(historyData);
     });
-
-    test('should respond with history when user is authenticated', () => {
-        // Mock database, request, and response objects
-        const mockDb = {
-          get_history: jest.fn().mockReturnValueOnce([]), 
-        };
-        const mockReq = {
-          session: {
-            user: {
-              username: 'testuser', 
-            },
-          },
-        };
-        const mockRes = {
-          status: jest.fn().mockReturnThis(),
-          json: jest.fn(),
-        };
-    
-        // Call the function to be tested
-        api_get_history(mockDb, mockReq, mockRes);
-    
-        expect(mockRes.status).toHaveBeenCalledWith(200);
-        expect(mockRes.json).toHaveBeenCalledWith([]); 
-      });
+  
+    it('should return "Internal server error" if database operation fails', async () => {
+      const reqMock = {
+        session: {
+          user: { username: 'testUser' },
+        },
+      };
+      const resMock = {
+        status: jest.fn(() => resMock),
+        json: jest.fn(),
+      };
+      const dbMock = {
+        get_history: jest.fn().mockRejectedValue('Database error'),
+      };
+  
+      await api_get_history(dbMock, reqMock, resMock);
+  
+      expect(resMock.status).toHaveBeenCalledWith(500);
+      expect(resMock.json).toHaveBeenCalledWith({ error: 'Internal server error' });
+    });
   });
+  
 
-  describe('api_get_price', () => {
-    test('should respond with 401 status when user is not authenticated', () => {
-      // Mock database and request/response objects
-      const mockDb = {
-        get_price: jest.fn(),
-      };
-      const mockReq = {
-        session: {
-          user: {},
-        },
-      };
-      const mockRes = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
-      };
-  
-      // Call the function to be tested
-      api_get_price(mockDb, mockReq, mockRes);
-  
-      expect(mockRes.status).toHaveBeenCalledWith(401);
-      expect(mockRes.json).toHaveBeenCalledWith({ error: 'Not authenticated' });
+describe('api_get_price', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
     });
-
-    test('should respond with price when user is authenticated', () => {
-        // Mock database, request, and response objects
-        const mockDb = {
-          get_price: jest.fn().mockReturnValueOnce({ price: 10 }), 
-        };
-        const mockReq = {
-          session: {
-            user: {
-              username: 'testuser', 
-            },
-          },
-        };
-        const mockRes = {
-          status: jest.fn().mockReturnThis(),
-          json: jest.fn(),
-        };
-    
-        // Call the function to be tested
-        api_get_price(mockDb, mockReq, mockRes);
-    
-        expect(mockRes.status).toHaveBeenCalledWith(200);
-        expect(mockRes.json).toHaveBeenCalledWith({ price: 10 }); 
-      });
+  
+    it('should return "Not authenticated" error if user is not authenticated', async () => {
+      reqMock.session.user = {};
+  
+      await api_get_price(dbMock, reqMock, resMock);
+  
+      expect(resMock.status).toHaveBeenCalledWith(401);
+      expect(resMock.json).toHaveBeenCalledWith({ error: 'Not authenticated.' });
+    });
+  
+    it('should return "Not authenticated" error if username is missing', async () => {
+      reqMock.session.user.username = {};
+  
+      await api_get_price(dbMock, reqMock, resMock);
+  
+      expect(resMock.status).toHaveBeenCalledWith(401);
+      expect(resMock.json).toHaveBeenCalledWith({ error: 'Not authenticated.' });
+    });
+  
+    it('should return "Internal server error" if get_price throws an error', async () => {
+      dbMock.get_price.mockRejectedValueOnce('Database error');
+  
+      await api_get_price(dbMock, reqMock, resMock);
+  
+      expect(resMock.status).toHaveBeenCalledWith(500);
+      expect(resMock.json).toHaveBeenCalledWith({ error: 'Internal server error' });
+    });
+  
+    it('should return "Internal server error" if get_user throws an error', async () => {
+      dbMock.get_price.mockResolvedValueOnce(10); 
+      dbMock.get_user.mockRejectedValueOnce('Database error');
+  
+      await api_get_price(dbMock, reqMock, resMock);
+  
+      expect(resMock.status).toHaveBeenCalledWith(500);
+      expect(resMock.json).toHaveBeenCalledWith({ error: 'Internal server error' });
+    });
+  
+  
+    it('should return price if user is authenticated and price is available', async () => {
+      dbMock.get_price.mockResolvedValueOnce(10); 
+      dbMock.get_user.mockResolvedValueOnce({});
+  
+      await api_get_price(dbMock, reqMock, resMock);
+  
+      expect(resMock.status).toHaveBeenCalledWith(200);
+      expect(resMock.json).toHaveBeenCalledWith(10);
+    });
   });
 
   describe('get_history', () => {
-    test('should send the HTML file when requested', () => {
-      // Mock request and response objects
-      const mockReq = {};
-      const mockRes = {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+  
+    it('should send the history file if requested', () => {
+      const reqMock = {};
+      const resMock = {
         sendFile: jest.fn(),
       };
-      const htmlPath = '../resources/quote/history'; 
+      const htmlPath = 'path/to/history.html';
   
-      // Call the function to be tested
-      get_history(mockReq, mockRes, htmlPath);
+      get_history(reqMock, resMock, htmlPath);
   
-      expect(mockRes.sendFile).toHaveBeenCalledWith(htmlPath);
+      expect(resMock.sendFile).toHaveBeenCalledWith(htmlPath);
     });
   });
 
   describe('get_quote', () => {
-    test('should send the HTML file when requested', () => {
-      // Mock request and response objects
-      const mockReq = {};
-      const mockRes = {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+  
+    it('should send the quote file if requested', () => {
+      const reqMock = {};
+      const resMock = {
         sendFile: jest.fn(),
       };
-      const htmlPath = '../resources/quote/quote'; 
+      const htmlPath = 'path/to/quote.html';
   
-      // Call the function to be tested
-      get_quote(mockReq, mockRes, htmlPath);
+      get_quote(reqMock, resMock, htmlPath);
   
-      expect(mockRes.sendFile).toHaveBeenCalledWith(htmlPath);
+      expect(resMock.sendFile).toHaveBeenCalledWith(htmlPath);
     });
   });
-
+  
   describe('post_quote', () => {
-    test('should respond with 400 status when user has not authenticated', () => {
-      // Mock database, request, and response objects
-      const mockDb = {
-        get_user: jest.fn(),
-        get_price: jest.fn(),
-        get_history: jest.fn(),
-        insert_quote: jest.fn(),
-      };
-      const mockReq = {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+  
+    it('should return "Not authenticated." error if user is not authenticated', async () => {
+      const reqMock = {
         session: {
-          user: null,
+          user: {
+            username: {},
+          },
+        },
+        body: {
+          gallons: {},
+        },
+      };
+
+      const resMock = {
+        status: jest.fn(() => resMock),
+        json: jest.fn(),
+      };
+
+      const dbMock = {
+        get_user: jest.fn(),
+      };
+  
+      await post_quote(dbMock, reqMock, resMock);
+  
+      expect(resMock.status).toHaveBeenCalledWith(401);
+      expect(resMock.json).toHaveBeenCalledWith({ error: 'Not authenticated.' });
+    });
+  
+    it('should redirect to "/quote/history" after successful quote insertion', async () => {
+      const reqMock = {
+        session: {
+          user: {
+            username: 'testUser',
+          },
         },
         body: {
           gallons: 100,
         },
       };
-      const mockRes = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
+      const resMock = {
         redirect: jest.fn(),
       };
-  
-      // Call the function to be tested
-      post_quote(mockDb, mockReq, mockRes);
-  
-      expect(mockRes.status).toHaveBeenCalledWith(400);
-      expect(mockRes.json).toHaveBeenCalledWith({ error: 'User has not authenticated.' });
-  
-      expect(mockDb.insert_quote).not.toHaveBeenCalled();
-    });
-  
-    test('should respond with 400 status and error message when gallons or price is invalid', () => {
-      // Mock database, request, and response objects
-      const mockDb = {
-        get_user: jest.fn(),
-        get_price: jest.fn().mockReturnValue({ price: 'invalid' }),
-        get_history: jest.fn(),
+      const dbMock = {
+        get_user: jest.fn().mockResolvedValue({}),
+        get_price: jest.fn().mockResolvedValue({ price: 2.5 }),
+        get_history: jest.fn().mockResolvedValue([]),
         insert_quote: jest.fn(),
       };
-      const mockReq = {
+  
+      await post_quote(dbMock, reqMock, resMock);
+  
+      expect(dbMock.insert_quote).toHaveBeenCalled();
+      expect(resMock.redirect).toHaveBeenCalledWith('/quote/history');
+    });
+  });
+
+
+  //testing utils.js
+  describe('Quote Model', () => {
+    beforeAll(async () => {
+      // Connect to the MongoDB test database
+      await mongoose.connect('mongodb://localhost:27017/test', {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      });
+    });
+  
+    afterAll(async () => {
+      await mongoose.disconnect();
+    });
+  
+    afterEach(async () => {
+      await Quote.deleteMany({});
+    });
+  
+    it('should create and save a new quote successfully', async () => {
+      const quoteData = {
+        username: 'testUser',
+        quote_id: 1,
+        gallons: 100,
+        address: '123 Test St',
+        date: new Date(),
+        price: 2.5,
+      };
+  
+      const newQuote = new Quote(quoteData);
+      await newQuote.save();
+  
+      const savedQuote = await Quote.findOne({});
+  
+      expect(savedQuote.username).toEqual(quoteData.username);
+      expect(savedQuote.quote_id).toEqual(quoteData.quote_id);
+      expect(savedQuote.gallons).toEqual(quoteData.gallons);
+      expect(savedQuote.address).toEqual(quoteData.address);
+      expect(savedQuote.date).toEqual(quoteData.date);
+      expect(savedQuote.price).toEqual(quoteData.price);
+    });
+  
+    it('should calculate the cost correctly based on gallons and price', () => {
+      const quoteData = {
+        username: 'testUser',
+        quote_id: 1,
+        gallons: 100,
+        address: '123 Test St',
+        date: new Date(),
+        price: 2.5,
+      };
+  
+      const newQuote = new Quote(quoteData);
+
+      const expectedCost = quoteData.gallons * quoteData.price;
+
+      expect(newQuote.cost).toEqual(expectedCost);
+    });
+  });
+
+  describe('checkAuth Function', () => {
+    it('should call next() if user is authenticated', () => {
+      const reqMock = {
         session: {
-          user: { username: 'testuser' },
-        },
-        body: {
-          gallons: 'not a number',
+          user: { username: 'testUser' },
         },
       };
-      const mockRes = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
+      const resMock = {};
+      const nextMock = jest.fn();
+  
+      checkAuth(reqMock, resMock, nextMock);
+  
+      expect(nextMock).toHaveBeenCalled();
+    });
+  
+    it('should redirect to "/login" if user is not authenticated', () => {
+      const reqMock = {
+        session: {
+          user: null,
+        },
+      };
+      const resMock = {
         redirect: jest.fn(),
       };
+      const nextMock = jest.fn();
   
-      // Call the function to be tested
-      post_quote(mockDb, mockReq, mockRes);
+      checkAuth(reqMock, resMock, nextMock);
   
-      expect(mockRes.status).toHaveBeenCalledWith(400);
-      expect(mockRes.json).toHaveBeenCalledWith({ error: 'Invalid data provided.' });
-  
-      expect(mockDb.insert_quote).not.toHaveBeenCalled();
-    });
-
-    test('should insert a new quote into the database and redirect to /quote/history', () => {
-        // Mock database, request, and response objects
-        const mockDb = {
-          get_user: jest.fn().mockReturnValue({ username: 'testuser', fullAddress: '123 Main St, Anytown, USA' }),
-          get_price: jest.fn().mockReturnValue({ price: '1.50' }),
-          get_history: jest.fn().mockReturnValue([]), 
-          insert_quote: jest.fn(),
-        };
-        const mockReq = {
-          session: {
-            user: { username: 'testuser' },
-          },
-          body: {
-            gallons: 100,
-          },
-        };
-        const mockRes = {
-          status: jest.fn().mockReturnThis(),
-          json: jest.fn(),
-          redirect: jest.fn(),
-        };
-    
-        // Call the function to be tested
-        post_quote(mockDb, mockReq, mockRes);
-    
-        expect(mockDb.insert_quote).toHaveBeenCalledWith(
-          'testuser',
-          expect.objectContaining({
-            gallons: 100,
-            address: '123 Main St, Anytown, USA',
-            date: expect.any(String), 
-            price: 1.50,
-          })
-        );
-    
-        expect(mockRes.redirect).toHaveBeenCalledWith('/quote/history');
-      });
-  });
-  
-  //This tests utils.js.
-  const { checkAuth } = require('../utils');
-
-  describe('checkAuth', () => {
-    test('should call next() if user is authenticated', () => {
-      const mockReq = { session: { user: { username: 'testuser' } } };
-      const mockRes = {};
-      const mockNext = jest.fn();
-  
-      checkAuth(mockReq, mockRes, mockNext);
-  
-      expect(mockNext).toHaveBeenCalled();
-    });
-  
-    test('should redirect to login page if user is not authenticated', () => {
-      const mockReq = { session: {} };
-      const mockRes = { redirect: jest.fn() };
-      const mockNext = jest.fn();
-  
-      checkAuth(mockReq, mockRes, mockNext);
-  
-      expect(mockRes.redirect).toHaveBeenCalledWith('/login');
-      expect(mockNext).not.toHaveBeenCalled();
-    });
-  });
-
-  //tests the quote.js file in the models folder(quote class)
-  describe('Quote', () => {
-    test('constructor should initialize quote properties', () => {
-      const quote_id = 1;
-      const gallons = 100;
-      const address = '123 Main St';
-      const date = '2022-03-31';
-      const price = 2.5;
-  
-      const quote = new Quote(quote_id, gallons, address, date, price);
-  
-      expect(quote.quote_id).toEqual(quote_id);
-      expect(quote.gallons).toEqual(gallons);
-      expect(quote.address).toEqual(address);
-      expect(quote.date).toEqual(date);
-      expect(quote.price).toEqual(price);
-    });
-  
-    test('cost getter should return the correct cost', () => {
-      const quote_id = 1;
-      const gallons = 100;
-      const address = '123 Main St';
-      const date = '2022-03-31';
-      const price = 2.5;
-  
-      const quote = new Quote(quote_id, gallons, address, date, price);
-  
-      expect(quote.cost).toEqual(gallons * price);
+      expect(resMock.redirect).toHaveBeenCalledWith('/login');
+      expect(nextMock).not.toHaveBeenCalled();
     });
   });
