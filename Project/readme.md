@@ -22,5 +22,5 @@ MONGO_PASSWORD=password
 To install the dependencies, navigate to the project directory in your terminal and run:
 
 ```bash
-npm install express body-parser express-session mongoose
+npm install express body-parser express-session mongoose bcrypt
 ```
