@@ -45,6 +45,8 @@ app.use(
   })
 );
 
+db.seedData().catch(err => console.error('Error seeding data:',err));
+
 app.get("/", (req, res) => {
   res.sendFile(PATHS.get("INDEX"));
 });
