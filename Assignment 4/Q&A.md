@@ -107,6 +107,13 @@ module.exports = Database;
 ```
 
 3. Rerun the code coverage report and provide it. (2 points)
+   
+   We used jest to run code coverage reports. To run code coverage reports using jest, please follow these steps:
+    1. Install Jest. Open terminal and type: npm install --save-dev jest
+    2. Install jsdom. Open terminal and type: npm install --save-dev jest-environment-jsdom
+    3. Once installed, type in terminal: npx jest --coverage
+
+   ![image](https://github.com/Angel-Sharma/COSC4353/assets/159072900/d0592ac4-b0e6-4535-9a98-8c013ff20a22)
 
 4. IMPORTANT: list who did what within the group. TAs should be able to validate in GitHub, otherwise team members who didn't contribute will receive a ZERO.
 
@@ -120,6 +127,8 @@ Discussion Notes
 
 Suryansh Sharma- I populated the database and created a function to auto populate the database each time the 
 app is run.
+
+Abhinav Krothapalli - I rewrote the code coverage reports for the updated backend modules.
  
  
  
