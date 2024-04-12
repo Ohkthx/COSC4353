@@ -130,7 +130,7 @@ app is run.
 
 Abhinav Krothapalli - I rewrote the code coverage reports for the updated backend modules.
  
- 
+Benjamin Mogeni- Updated css and quotes in user
  
  
  
