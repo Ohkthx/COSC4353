@@ -33,6 +33,40 @@
               error
             )
           );
+
+        fetch("/api/quote/history")
+                .then((response) => {
+                  if (response.ok) {
+                    return response.json();
+                  }
+                  throw new Error("Network response was not ok.");
+                })
+                .then((quotes) => {
+                  const tableBody = document
+                          .getElementById("quote-table")
+                          .getElementsByTagName("tbody")[0];
+
+                  // Iterate over each quote and add it to the table
+                  Object.values(quotes).forEach((quote) => {
+                    const row = tableBody.insertRow();
+
+                    // Create cells and append them to the row
+                    const cost = quote.gallons * quote.price;
+                    row.insertCell().textContent = `${quote.gallons.toFixed(2)}`;
+                    row.insertCell().textContent = quote.address;
+                    row.insertCell().textContent = quote.date.split("T")[0];
+                    row.insertCell().textContent = `$${quote.price.toFixed(2)}`;
+                    row.insertCell().textContent = `$${cost.toFixed(2)}`;
+                  });
+                })
+                .catch((error) =>
+                        console.error(
+                                "There was a problem with the fetch operation:",
+                                error
+                        )
+                );
+
+
       });
     </script>
   </head>
@@ -58,8 +92,30 @@
 
         <div class="panel-container">
           <div id="user-left-pane" class="left-pane">
-            <h2>Placeholder Title</h2>
-            <p>Snapshot of quotes requested?</p>
+            <h2>Recent Quotes</h2>
+            <table id="quote-table" >
+              <thead>
+              <tr>
+                <th>Gallons</th>
+                <th>Delivery Address</th>
+                <th>Delivery Date</th>
+                <th>Price per Gallon</th>
+                <th>Amount Due</th>
+              </tr>
+              </thead>
+
+              <!-- Populated by the application. -->
+              <tbody>
+              <!-- <tr>
+                <td>100</td>
+                <td>4434 University Drive Houston, TX 77204</td>
+                <td>2024-02-19</td>
+                <td>$3.00</td>
+                <td>$300.00</td>
+              </tr> -->
+              </tbody>
+            </table>
+
           </div>
           <div id="user-right-pane" class="right-pane">
             <h2>Placeholder Title</h2>

@@ -179,6 +179,27 @@ Discussion Notes
 Suryansh Sharma- I populated the database and created a function to auto populate the database each time the
 app is run.
 
+Benjamin Mogeni- Updated css and quotes in user next to profile
+
 Abhinav Krothapalli - I rewrote the code coverage reports for the updated backend modules.
 
+
 Ryan Ball - Swapped out the original pseudo-database with MongoDB. Connected the API requests / calls to the database to retrieve information. Additional, updated all of the database functions to make appropriate queries to retrieve / store the information. Updated several HTMLs to reflect the new changes and produce the data. Added encryption to passwords and verification when adding seeded database data.
+
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+What to turn in: 
+- Only soft copy uploaded to BlackBoard before due date. 
+- DO NOT SUBMIT CODE to Canvas. 
+- Only one submission per group.
+- No extensions.
+- All group members must contribute equally.
