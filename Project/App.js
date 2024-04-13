@@ -21,8 +21,10 @@ const {
   post_quote,
   get_history,
 } = require("./routes/quote");
+const bcrypt = require("bcrypt");
 
 // Globals
+const salt = 4; // For the password hashing.
 const app = express();
 const db = new Database();
 const PORT = 3000; // Port number used to connect to the application.
@@ -44,8 +46,6 @@ app.use(
     cookie: { secure: false },
   })
 );
-
-db.seedData().catch(err => console.error('Error seeding data:',err));
 
 app.get("/", (req, res) => {
   res.sendFile(PATHS.get("INDEX"));
@@ -111,13 +111,19 @@ app.post("/login", async (req, res) => {
   }
 
   try {
-    // Check if the user account exists already.
+    // Check if the user account already exists.
     const account = await db.get_account(username);
-    if (!account || account.password !== password) {
+    if (!account) {
       return res.status(401).json({ error: "Invalid username or password" });
     } else {
-      req.session.user = { username };
-      res.redirect("/user");
+      // Compare the password provided to the password received.
+      const match = await bcrypt.compare(password, account.password);
+      if (match) {
+        req.session.user = { username };
+        res.redirect("/user");
+      } else {
+        return res.status(401).json({ error: "Invalid username or password" });
+      }
     }
   } catch (error) {
     console.error(`[LOGIN]: ${error}`);
@@ -142,7 +148,9 @@ app.post("/register", async (req, res) => {
     if (account) {
       return res.status(400).json({ error: "Username already exists" });
     } else {
-      await db.insert_account(Account.createAccount(username, password));
+      // Encrypt new password for user.
+      const hashedPassword = await bcrypt.hash(password, salt);
+      await db.insert_account(Account.createAccount(username, hashedPassword));
 
       // Create placeholder profile data.
       await db.insert_user(User.createUser(username));
