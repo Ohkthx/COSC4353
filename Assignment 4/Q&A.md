@@ -176,10 +176,10 @@ Group Member Name
 What is your contribution?
 Discussion Notes
 
-Suryansh Sharma- I populated the database and created a function to auto populate the database each time the
+Suryansh Sharma- populated the database and created a function to auto populate the database each time the
 app is run.
 
-Benjamin Mogeni- Updated css and quotes in user next to profile
+Benjamin Mogeni- Updated css and added the recent quotes feature in user next to profile
 
 Abhinav Krothapalli - I rewrote the code coverage reports for the updated backend modules.
 
