@@ -1,41 +1,24 @@
 const Quote = require("../models/quote");
 const { getToday } = require("../utils");
+const { get_price } = require("./price.js");
 
 // Processes GET requests to the `/api/quote/history` route.
 async function api_get_history(db, req, res) {
   const username = req.session.user.username;
 
   try {
-    const history = await db.get_history(username);
-
-    if (!req.session.user || !username || !history) {
+    if (!req.session.user || !username) {
       res.status(401).json({ error: "Not authenticated" });
+    }
+
+    const history = await db.get_history(username);
+    if (!history) {
+      res.status(401).json({ error: "Unable to obtain history." });
     } else {
       res.status(200).json(history);
     }
   } catch (error) {
     console.error(`[API_GET_HISTORY]: ${error}`);
-    res.status(500).json({ error: "Internal server error" });
-  }
-}
-
-// Processes GET requests to the `/api/quote/price` route.
-async function api_get_price(db, req, res) {
-  const username = req.session.user.username;
-
-  try {
-    const price = await db.get_price();
-    const user = await db.get_user(username);
-    if (!req.session.user || !username || !user) {
-      res.status(401).json({ error: "Not authenticated." });
-    } else if (!price) {
-      console.error(`[API_GET_PRICE::PRICE]: ${error}`);
-      res.status(500).json({ error: "Internal server error" });
-    } else {
-      res.status(200).json(price);
-    }
-  } catch (error) {
-    console.error(`[API_GET_PRICE]: ${error}`);
     res.status(500).json({ error: "Internal server error" });
   }
 }
@@ -66,27 +49,29 @@ async function post_quote(db, req, res) {
       return res.status(401).json({ error: "Not authenticated." });
     }
 
-    // Extract and convert the data.
+    // Get the counts for the user and all.
+    const user_history = await db.get_history_total(username);
+    const total_history = await db.get_history_total();
+
+    // Extract and convert the data, only trust gallons sent from user.
     gallons = parseInt(gallons);
     const priceData = await db.get_price();
     const price = parseFloat(priceData.price);
+    const pricePerGallon = get_price(price, gallons, user.state, user_history);
 
-    if (isNaN(gallons) || isNaN(price)) {
+    if (isNaN(gallons) || isNaN(price) || isNaN(pricePerGallon)) {
       return res.status(400).json({ error: "Invalid data provided." });
     }
-
-    const history = await db.get_history(username);
-    const quote_id = history.length;
 
     // Create and insert the new quote.
     await db.insert_quote(
       Quote.createQuote(
         username,
-        quote_id,
+        total_history + 1,
         gallons,
         user.fullAddress,
         date,
-        price
+        pricePerGallon
       )
     );
     res.redirect("/quote/history");
@@ -98,7 +83,6 @@ async function post_quote(db, req, res) {
 
 module.exports = {
   api_get_history,
-  api_get_price,
   get_history,
   get_quote,
   post_quote,

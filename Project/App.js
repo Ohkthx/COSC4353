@@ -16,11 +16,11 @@ const {
 } = require("./routes/user");
 const {
   api_get_history,
-  api_get_price,
   get_quote,
   post_quote,
   get_history,
 } = require("./routes/quote");
+const { api_post_price } = require("./routes/price");
 const bcrypt = require("bcrypt");
 
 // Globals
@@ -34,7 +34,9 @@ if (nologin) {
   console.log(`Running with '--nologin', default user: ${nologin_user}`);
 }
 
-app.use(bodyParser.urlencoded({ extended: false }));
+// Modified to support JSON to API endpoints.
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
 // Session configuration. Not very secure, for testing.
@@ -92,8 +94,8 @@ app.get("/api/quote/history", async (req, res) => {
   await api_get_history(db, req, res);
 });
 
-app.get("/api/quote/price", async (req, res) => {
-  await api_get_price(db, req, res);
+app.post("/api/quote/price", async (req, res) => {
+  return api_post_price(db, req, res);
 });
 
 app.post("/login", async (req, res) => {
