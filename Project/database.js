@@ -7,8 +7,9 @@ const bcrypt = require("bcrypt");
 const salt = 4;
 require("dotenv").config();
 
+// Price the refinery sets.
 const PRICE = {
-  price: "3.50",
+  price: "1.50",
 };
 
 const sampleUsers = [
@@ -247,6 +248,18 @@ class Database {
 
   async get_history(username) {
     return Quote.find({ username }).exec();
+  }
+
+  // Id is based on total documents (quotes) + 1 for simplicity.
+  async get_history_total(username = undefined) {
+    let count = 0;
+    if (!username) {
+      count = await Quote.countDocuments();
+    } else {
+      count = await Quote.countDocuments({ username });
+    }
+
+    return parseInt(count);
   }
 
   async get_price() {

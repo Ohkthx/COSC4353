@@ -7,50 +7,66 @@
     <title>Quote - Create</title>
     <script>
       document.addEventListener("DOMContentLoaded", async function () {
+        let userProfile; // Global, holds the user profile.
+
+        // Obtain the buttons to disable until conditions are met.
+        const getQuoteButton = document.getElementById("get-quote-button");
+        const submitButton = document.getElementById("create-button");
+        const gallonsInput = document.getElementById("gallons");
+
+        // Initially disable the get quote and submit buttons.
+        getQuoteButton.disabled = true;
+        submitButton.disabled = true;
+
+        // Enable get quote button only if there is a valid number of gallons.
+        gallonsInput.addEventListener("input", function () {
+          getQuoteButton.disabled =
+            !this.value || isNaN(parseFloat(this.value));
+        });
+
         try {
-          // Fetch user profile data.
+          // Get the user profile data, also used to get their state.
           let response = await fetch("/api/user/profile");
           if (!response.ok) {
             throw new Error("Network response was not ok for user profile.");
           }
-          let user = await response.json();
 
-          // Optional address2 handler.
-          if (user.address2) {
-            user.address2 = ` ${user.address2}`;
-          }
+          userProfile = await response.json();
 
-          // Construct full address.
-          const fullAddress = `${user.address1}${user.address2}, ${user.city}, ${user.state} ${user.zipcode}`;
+          // Fixes the address output in the form.
+          const fullAddress = `${userProfile.address1}${
+            userProfile.address2 ? " " + userProfile.address2 : ""
+          }, ${userProfile.city}, ${userProfile.state} ${userProfile.zipcode}`;
           document.getElementById("address").value = fullAddress;
 
-          // Fetch quote price.
-          response = await fetch("/api/quote/price");
-          if (!response.ok) {
-            throw new Error("Network response was not ok for quote price.");
-          }
-          let quotePrice = await response.json();
+          // Triggers when the `Get Quote` button is pressed.
+          getQuoteButton.addEventListener("click", async function () {
+            const gallonsRequested = gallonsInput.value;
+            const state = userProfile.state;
 
-          // Update price in the form.
-          const priceField = document.getElementById("price");
-          priceField.value = quotePrice.price;
+            try {
+              // Request the price data.
+              const response = await fetch("/api/quote/price", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ gallonsRequested, state }),
+              });
 
-          // Listen for changes in gallons requested and calculate the new amount due.
-          document
-            .getElementById("gallons")
-            .addEventListener("input", function () {
-              const gallonsRequested = parseFloat(this.value);
-              const pricePerGallon = parseFloat(priceField.value);
-              const amountDueField = document.getElementById("cost");
-
-              // Ensure that it is a number after converting to a float.
-              if (!isNaN(gallonsRequested) && !isNaN(pricePerGallon)) {
-                const amountDue = gallonsRequested * pricePerGallon;
-                amountDueField.value = amountDue.toFixed(2);
-              } else {
-                amountDueField.value = "0.0";
+              if (!response.ok) {
+                throw new Error("Network response was not ok.");
               }
-            });
+
+              // Populate the fields with the value from the API.
+              const result = await response.json();
+              document.getElementById("price").value = result.price;
+              document.getElementById("cost").value = result.totalAmountDue;
+
+              // Enable the submit button.
+              submitButton.disabled = false;
+            } catch (error) {
+              console.error("Failed to get the quote:", error);
+            }
+          });
         } catch (error) {
           console.error("There was a problem with the fetch operation:", error);
         }
@@ -73,7 +89,6 @@
         </nav>
       </header>
 
-      <!-- Include outline of project here?-->
       <main class="content">
         <h1>Create a Fuel Quote</h1>
 
@@ -106,7 +121,6 @@
             <input type="date" id="date" name="date" width="100" />
             <br />
 
-            <!-- This is populated by the application and cannot be modified. -->
             <label for="price">Suggested Price:</label>
             <input
               type="number"
@@ -130,6 +144,7 @@
           </div>
 
           <div class="form-submit">
+            <button type="button" id="get-quote-button">Get Quote</button>
             <input
               type="submit"
               id="create-button"
