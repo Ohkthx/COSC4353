@@ -61,3 +61,5 @@ https://github.com/Angel-Sharma/COSC4353/tree/main/Project
 ## Personal Group Contributions
 
 Ryan Ball - Converted the old GET pricing endpoint into a POST pricing that received `gallons` and `state` to calculate the margin, price per gallon, and total amount. Update HTML for quote creation.
+
+Suryansh Sharma - Fixed some css with quote pricing button, and some css issues with the "city" label being beside the input box rather than above.
