@@ -2,6 +2,8 @@
 
 In this assignment you will create the pricing module for Fuel Quote Form and put together the complete project that you have built so far.
 
+https://github.com/Angel-Sharma/COSC4353/blob/main/Assignment%205/Q%26A.md
+
 ## Description:
 
 Same as assignment 1.
