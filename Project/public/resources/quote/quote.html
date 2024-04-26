@@ -58,11 +58,14 @@
 
               // Populate the fields with the value from the API.
               const result = await response.json();
+              document.getElementById("gallons").value = result.gallons;
               document.getElementById("price").value = result.price;
               document.getElementById("cost").value = result.totalAmountDue;
 
               // Enable the submit button.
-              submitButton.disabled = false;
+              if (result.gallons > 0) {
+                submitButton.disabled = false;
+              }
             } catch (error) {
               console.error("Failed to get the quote:", error);
             }

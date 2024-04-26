@@ -7,7 +7,10 @@ async function api_post_price(db, req, res) {
   // Extract information sent from client.
   const username = req.session.user.username;
   const { gallonsRequested, state } = req.body;
-  const gallons = parseInt(gallonsRequested);
+  let gallons = parseInt(gallonsRequested);
+  if (gallons < 0) {
+    gallons = 0;
+  }
 
   try {
     const user = await db.get_user(username);
@@ -28,6 +31,7 @@ async function api_post_price(db, req, res) {
     const totalAmount = pricePerGallon * gallons;
 
     res.status(200).json({
+      gallons: gallons,
       price: pricePerGallon.toFixed(2),
       totalAmountDue: totalAmount.toFixed(2),
     });
