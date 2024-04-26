@@ -77,4 +77,4 @@ Suryansh Sharma - Fixed some css with quote pricing button, and some css issues 
 
 Abhinav Krothapalli - I ran the code coverage for the new pricing module and adjusted the old test files as we needed to make some additional backend changes.
 
-Benjamin mogeni - I added more validation for update form
+Benjamin mogeni - Followed TA feedback and added more validation for the update form
