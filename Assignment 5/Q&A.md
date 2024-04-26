@@ -52,6 +52,10 @@ Additional Validations:
 3. Demo prior to project due date. (3 points)
 4. IMPORTANT: list who did what within the group. TAs should be able to validate in GitHub, otherwise team members who didn't contribute will receive a ZERO.
 
+## Demo
+
+All of our group showed up at 11:45am-12:00pm to Demo the project for the TA Bahiru, Tadesse Kebede
+
 ## Provide link to GitHub repository for TAs to view the code. (5 points)
 
 https://github.com/Angel-Sharma/COSC4353/tree/main/Project
