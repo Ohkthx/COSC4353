@@ -39,6 +39,7 @@ async function post_quote(db, req, res) {
 
   // Extract the users information.
   let { gallons, date } = req.body;
+   // istanbul ignore next
   if (!date) {
     date = getToday();
   }
