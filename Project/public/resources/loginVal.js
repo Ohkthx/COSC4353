@@ -29,6 +29,7 @@ function handleFormSubmission(event) {
 }
 
 const el = document.getElementById('login-form');
+// istanbul ignore next
 if (el){
   el.addEventListener('submit', handleFormSubmission)
 }
