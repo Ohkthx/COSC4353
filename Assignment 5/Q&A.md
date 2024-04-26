@@ -76,3 +76,5 @@ Ryan Ball - Converted the old GET pricing endpoint into a POST pricing that rece
 Suryansh Sharma - Fixed some css with quote pricing button, and some css issues with the "city" label being beside the input box rather than above.
 
 Abhinav Krothapalli - I ran the code coverage for the new pricing module and adjusted the old test files as we needed to make some additional backend changes.
+
+Benjamin mogeni - I added more validation for update form
