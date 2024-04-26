@@ -9,6 +9,13 @@
   },
   "jest": {
     "collectCoverage": true,
+    "collectCoverageFrom": [
+      "utils.js",
+      "routes/price.js",
+      "routes/quote.js",
+      "routes/user.js",
+      "public/resources/loginVal.js"
+    ],
     "projects": [
       {
         "testEnvironment": "node",
