@@ -57,9 +57,18 @@ Additional Validations:
 https://github.com/Angel-Sharma/COSC4353/tree/main/Project
 
 ## Rerun the code coverage report. Code coverage must be above 80%. (2 points)
+We used jest to run code coverage reports. To run code coverage reports using jest, please follow these steps:
+
+1.  Install Jest. Open terminal and type: npm install --save-dev jest
+2.  Install jsdom. Open terminal and type: npm install --save-dev jest-environment-jsdom
+3.  Once installed, type in terminal: npx jest --coverage
+
+![image](https://github.com/Angel-Sharma/COSC4353/assets/159072900/13b2b311-0e45-4328-b198-95662b8d8e11)
 
 ## Personal Group Contributions
 
 Ryan Ball - Converted the old GET pricing endpoint into a POST pricing that received `gallons` and `state` to calculate the margin, price per gallon, and total amount. Update HTML for quote creation.
 
 Suryansh Sharma - Fixed some css with quote pricing button, and some css issues with the "city" label being beside the input box rather than above.
+
+Abhinav Krothapalli - I ran the code coverage for the new pricing module and adjusted the old test files as we needed to make some additional backend changes.
