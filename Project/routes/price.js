@@ -52,4 +52,4 @@ function get_price(price, gallons, state, history) {
   return price + calculate_margin(price, gallons, state, history);
 }
 
-module.exports = { api_post_price, get_price };
+module.exports = { api_post_price, get_price, calculate_margin };
